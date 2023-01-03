@@ -1,6 +1,6 @@
 {
-  "name": "SimpleUIHtmlTemplate",
-  "id": "1188035056898420648",
+  "name": "SimpleUIHtmlTailwindTemplate",
+  "id": "1188035056898420641",
   "api": "1.0.0",
   "ui": "dist/ui.html",
   "main": "dist/code.js",
