@@ -9,8 +9,7 @@ interface IMessageInput {
 
 const submitForm = async (value: FormValues) => {
   await figma.loadFontAsync({ family: "Inter", style: "Regular" })
-  let nodes = [] as SceneNode[]
-
+  
   const frame = figma.createFrame()
   frame.name = `Form: ${new Date().toLocaleString()}`
   frame.fills = []
@@ -40,7 +39,7 @@ const submitForm = async (value: FormValues) => {
   frame.counterAxisSizingMode = 'AUTO'
   frame.itemSpacing = 10
   
-  figma.viewport.scrollAndZoomIntoView(nodes);
+  figma.viewport.scrollAndZoomIntoView([frame]);
 }
 
 figma.showUI(__html__, { height: 600 })
