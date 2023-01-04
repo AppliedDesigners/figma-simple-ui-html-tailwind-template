@@ -1,34 +1,21 @@
 import './main.css'
 
-const showError = errorMessage => {
-    window.document.querySelector('#errors').textContent = errorMessage
-  }
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/FormData/entries
+ * - Entries: key value pairs
+ * - Values: just values
+ */ 
+window.document.querySelector('#submit-button').onclick = () => {
+  const form = window.document.querySelector('#form')
+  /**
+   * Convert the form entries into an object
+   */
+  const formData = new FormData(form)
+  const formValues = Object.fromEntries(formData.entries());
 
-window.document.querySelector('#insert-text-button').onclick = () => {
-    const text = window.document.querySelector('#insert-text-input').value
-
-    if (!text) {
-      showError('Error: Text must have a value');
-      return
-    }
-
-    parent.postMessage({ pluginMessage: { type: 'text', value: text } }, '*')
-  }
+  parent.postMessage({ pluginMessage: { type: 'submit', value: formValues } }, '*')
+}
   
-  window.document.querySelector('#pie-chart-button').onclick = () => {
-    const text = window.document.querySelector('#pie-chart-input').value
-
-    let numbers = text.split(',').map(x => Math.max(0, parseInt(x, 10)))
-    if (numbers.length < 2) {
-      showError('Error: Must have at least two segments');
-      return
-    }
-    if (numbers.some(x => isNaN(x))) {
-      showError('Error: All segments must be numbers');
-      return
-    }
-
-    parent.postMessage({ pluginMessage: { type: 'pie-chart', value: numbers } }, '*')
-  }
-
-  
+window.document.querySelector('#cancel-button').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+}

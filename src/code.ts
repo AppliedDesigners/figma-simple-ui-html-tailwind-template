@@ -1,58 +1,57 @@
+type FormValues = {
+  [key: string]: string
+}
+
 interface IMessageInput {
   type: string,
-  value: string | number[]
+  value: FormValues
 }
 
-const insertText = async (value: string) => {
+const submitForm = async (value: FormValues) => {
   await figma.loadFontAsync({ family: "Inter", style: "Regular" })
-  const textNode = figma.createText()
-  
-  textNode.characters = value
-  figma.currentPage.appendChild(textNode);
-
-  figma.viewport.scrollAndZoomIntoView([textNode]);
-}
-
-const insertPieChart = async (value: number[]) => {
-  const width = 100
-  const height = 100
+  let nodes = [] as SceneNode[]
 
   const frame = figma.createFrame()
-  figma.currentPage.appendChild(frame)
-  frame.resizeWithoutConstraints(width, height)
+  frame.name = `Form: ${new Date().toLocaleString()}`
+  frame.fills = []
 
-  const segmentsTotal = value.reduce((memo, segment) => memo + segment, 0)
-  
-  let start = 0;
-
-  for (const num of value) {
-    const color = Math.sqrt(start / segmentsTotal)
-    const ellipse = figma.createEllipse()
-    frame.appendChild(ellipse)
-    ellipse.resizeWithoutConstraints(width, height)
-    ellipse.fills = [{ type: 'SOLID', color: {r: color, g: color, b: color} }]
-    ellipse.constraints = {horizontal: 'STRETCH', vertical: 'STRETCH'}
-    ellipse.arcData = {
-      startingAngle: (start / segmentsTotal - 0.25) * 2 * Math.PI,
-      endingAngle: ((start + num) / segmentsTotal - 0.25) * 2 * Math.PI,
-      innerRadius: 0,
+  for (const key in value) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      if (value[key]) {
+        const textNode = figma.createText()
+        textNode.name = key
+        textNode.characters = value[key]
+        /**
+         * Note: rather than do a manual incremental layout like
+         * - textNode.y = 20 * valIx
+         * We delegate the layout responsibility to the frame and leverage it's auto-layout attributes
+         */
+        frame.appendChild(textNode)  
+      }
     }
-    start += num
   }
-
-  figma.viewport.scrollAndZoomIntoView([frame]);
+  
+  /**
+   * Set the auto layout properties of the Frame
+   */
+  frame.layoutGrow = 1
+  frame.layoutMode = "VERTICAL"
+  frame.primaryAxisSizingMode = 'AUTO'
+  frame.counterAxisSizingMode = 'AUTO'
+  frame.itemSpacing = 10
+  
+  figma.viewport.scrollAndZoomIntoView(nodes);
 }
 
-figma.showUI(__html__)
+figma.showUI(__html__, { height: 600 })
 
 figma.ui.onmessage = async ({ type, value }: IMessageInput) => {
-  if (type === 'text') {
-    await insertText(value as string)
-  } else if (type === 'pie-chart') {
-    await insertPieChart(value as number[])
+  if (type === 'submit') {
+    await submitForm(value as FormValues)
+    figma.closePlugin()
+  } else if (type === 'cancel') {
+    figma.closePlugin()
   } else {
     figma.notify(`Unsupported type: ${type}`, {error: true})
   }
-
-  figma.closePlugin()
 }
